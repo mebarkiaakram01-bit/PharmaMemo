@@ -3,143 +3,177 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#173B68">
 <title>PharmaMemo</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f3f6fb;color:#172b46}
-header{background:#173B68;color:white;padding:25px 20px 30px;border-radius:0 0 25px 25px}
-.top{display:flex;justify-content:space-between;align-items:center}
-.logo{font-size:25px;font-weight:800;letter-spacing:-1px}
-.logo span{color:#8ec5ff}
-.tag{font-size:12px;color:#d8e8fa;margin-top:5px}
-.avatar{background:#ffffff25;border-radius:50%;padding:11px}
-main{padding:20px;max-width:750px;margin:auto}
-.search{display:flex;background:white;border-radius:14px;padding:14px;gap:10px;box-shadow:0 3px 12px #19395b0c;margin-top:-3px}
-.search input{border:0;outline:0;width:100%;font-size:15px}
-h2{font-size:19px;margin:25px 0 14px}
-.sub{font-size:13px;color:#8291a5;margin-top:-9px;margin-bottom:16px}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.item{background:white;border-radius:16px;padding:17px 14px;border:1px solid #e8edf4;cursor:pointer;min-height:105px;transition:.2s}
-.item:active{transform:scale(.97)}
-.emoji{font-size:25px;margin-bottom:10px}
-.item strong{display:block;font-size:14px}
-.item small{color:#8997a9;font-size:12px}
-.card{background:white;padding:18px;border-radius:16px;border:1px solid #e8edf4;margin-bottom:12px}
-button{border:0;border-radius:10px;padding:12px 16px;background:#173B68;color:white;font-weight:600;cursor:pointer}
-.back{background:#e7eef8;color:#173B68;margin-bottom:15px}
-footer{text-align:center;color:#9aa6b5;font-size:11px;padding:30px 10px}
+body{margin:0;background:#f3f6fb;color:#18304e;font-family:Arial,sans-serif}
+header{background:#173b68;color:white;padding:22px;border-radius:0 0 22px 22px}
+header strong{font-size:25px}
+header span{color:#8ec5ff}
+header p{font-size:12px;margin-bottom:0;color:#d8e8fa}
+main{max-width:750px;margin:auto;padding:20px}
+h2{font-size:21px}
+.sub{color:#8291a5;font-size:13px}
+.card{background:white;border:1px solid #e5ebf3;border-radius:15px;padding:17px;margin:12px 0;cursor:pointer}
+.card strong{display:block;margin-bottom:6px}
+.card small{color:#8998aa}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.grid .card{margin:0}
+button{border:0;border-radius:10px;padding:12px 16px;background:#173b68;color:white;font-weight:bold;cursor:pointer}
+.back{background:#e5edf7;color:#173b68;margin-bottom:12px}
+input{width:100%;padding:15px;border:1px solid #e1e8f1;border-radius:12px;font-size:15px;margin:10px 0}
+.section{background:white;border:1px solid #e5ebf3;border-radius:13px;padding:16px;margin:12px 0}
+.section h3{font-size:15px;color:#173b68;margin:0 0 10px}
+.section p{font-size:14px;color:#61738a;line-height:1.5;margin:0}
 .hidden{display:none}
-nav{display:flex;justify-content:space-around;background:white;padding:14px;position:sticky;bottom:0;border-top:1px solid #e8edf4}
-nav button{background:transparent;color:#52647b;font-size:12px;padding:7px}
-nav button.active{color:#1766bd}
+.photo{background:#edf2f8;border-radius:12px;padding:25px;text-align:center;color:#8494a8;margin:10px 0}
+footer{text-align:center;color:#9aa6b5;font-size:11px;padding:25px}
 </style>
 </head>
 <body>
+
 <header>
- <div class="top">
-  <div>
-   <div class="logo">Pharma<span>Memo</span></div>
-   <div class="tag">Votre référence pharmaceutique</div>
-  </div>
-  <div class="avatar">💊</div>
- </div>
+<strong>Pharma<span>Memo</span></strong>
+<p>Votre référence pharmaceutique</p>
 </header>
 
 <main>
- <section id="home">
-  <h2>Bonjour 👋</h2>
-  <p class="sub">Explorez votre bibliothèque pharmaceutique.</p>
+<section id="home">
+<h2>Spécialités médicales</h2>
+<p class="sub">Choisissez une spécialité.</p>
+<div class="grid">
+<div class="card" onclick="openCardio()"><strong>❤️ Cardiologie</strong><small>Appareil cardiovasculaire</small></div>
+<div class="card"><strong>🫁 Pneumologie</strong><small>À compléter</small></div>
+<div class="card"><strong>🧠 Neurologie</strong><small>À compléter</small></div>
+<div class="card"><strong>🧬 Endocrinologie</strong><small>À compléter</small></div>
+<div class="card"><strong>🩺 Gastro-entérologie</strong><small>À compléter</small></div>
+<div class="card"><strong>🦠 Infectiologie</strong><small>À compléter</small></div>
+<div class="card"><strong>🦴 Rhumatologie</strong><small>À compléter</small></div>
+<div class="card"><strong>🧴 Dermatologie</strong><small>À compléter</small></div>
+</div>
+</section>
 
-  <div class="search">
-   🔍 <input id="search" placeholder="Rechercher un médicament ou une classe..." oninput="searchItems()">
-  </div>
+<section id="categories" class="hidden">
+<button class="back" onclick="show('home')">← Retour</button>
+<h2>Cardiologie</h2>
+<p class="sub">Catégories pharmacologiques</p>
+<div class="card" onclick="openDrugs()"><strong>💊 Antiarythmiques</strong><small>Voir les médicaments</small></div>
+<div class="card"><strong>💊 Antihypertenseurs</strong><small>Catalogue à construire</small></div>
+<div class="card"><strong>💊 Diurétiques</strong><small>Catalogue à construire</small></div>
+<div class="card"><strong>💊 Antiangineux</strong><small>Catalogue à construire</small></div>
+<div class="card"><strong>💊 Anticoagulants</strong><small>Catalogue à construire</small></div>
+<div class="card"><strong>💊 Antiagrégants plaquettaires</strong><small>Catalogue à construire</small></div>
+<div class="card"><strong>💊 Hypolipémiants</strong><small>Catalogue à construire</small></div>
+</section>
 
-  <h2>Spécialités médicales</h2>
-  <p class="sub">Choisissez une spécialité pour commencer.</p>
+<section id="drugs" class="hidden">
+<button class="back" onclick="show('categories')">← Retour</button>
+<h2>Antiarythmiques</h2>
+<p class="sub">Sélectionnez un médicament pour consulter sa fiche.</p>
+<input id="search" placeholder="Rechercher un médicament..." oninput="filterDrugs()">
+<div id="drugList"></div>
+</section>
 
-  <div class="grid" id="specialties">
-   <div class="item" onclick="openSpecialty('Cardiologie')"><div class="emoji">❤️</div><strong>Cardiologie</strong><small>Appareil cardiovasculaire</small></div>
-   <div class="item" onclick="openSpecialty('Pneumologie')"><div class="emoji">🫁</div><strong>Pneumologie</strong><small>Appareil respiratoire</small></div>
-   <div class="item" onclick="openSpecialty('Neurologie')"><div class="emoji">🧠</div><strong>Neurologie</strong><small>Système nerveux</small></div>
-   <div class="item" onclick="openSpecialty('Endocrinologie')"><div class="emoji">🧬</div><strong>Endocrinologie</strong><small>Système hormonal</small></div>
-   <div class="item" onclick="openSpecialty('Gastro-entérologie')"><div class="emoji">🩺</div><strong>Gastro-entérologie</strong><small>Appareil digestif</small></div>
-   <div class="item" onclick="openSpecialty('Infectiologie')"><div class="emoji">🦠</div><strong>Infectiologie</strong><small>Anti-infectieux</small></div>
-   <div class="item" onclick="openSpecialty('Rhumatologie')"><div class="emoji">🦴</div><strong>Rhumatologie</strong><small>Appareil locomoteur</small></div>
-   <div class="item" onclick="openSpecialty('Dermatologie')"><div class="emoji">🧴</div><strong>Dermatologie</strong><small>Peau et muqueuses</small></div>
-  </div>
- </section>
-
- <section id="details" class="hidden">
-  <button class="back" onclick="goHome()">← Retour</button>
-  <h2 id="specialtyTitle">Cardiologie</h2>
-  <p class="sub">Catégories pharmacologiques</p>
-  <div id="categories" class="grid"></div>
- </section>
-
- <section id="searchPage" class="hidden">
-  <button class="back" onclick="goHome()">← Retour</button>
-  <h2>Recherche</h2>
-  <p class="sub">Les résultats apparaîtront ici lorsque le catalogue sera connecté.</p>
- </section>
+<section id="fiche" class="hidden">
+<button class="back" onclick="show('drugs')">← Retour aux médicaments</button>
+<h2 id="drugName"></h2>
+<p class="sub" id="drugClass"></p>
+<div class="section">
+<h3>DCI</h3>
+<p id="dci"></p>
+</div>
+<div class="section">
+<h3>Noms commerciaux</h3>
+<p>À compléter et vérifier selon le marché algérien.</p>
+</div>
+<div class="section">
+<h3>Classe pharmacologique</h3>
+<p id="classDetail"></p>
+</div>
+<div class="section">
+<h3>Indications</h3>
+<p>À compléter à partir d'une source médicale vérifiée.</p>
+</div>
+<div class="section">
+<h3>Posologie</h3>
+<p>À compléter selon l'indication, la présentation et le patient.</p>
+</div>
+<div class="section">
+<h3>Contre-indications majeures</h3>
+<p>À compléter et vérifier.</p>
+</div>
+<div class="section">
+<h3>Effets indésirables fréquents</h3>
+<p>À compléter et vérifier.</p>
+</div>
+<div class="section">
+<h3>Photos du médicament</h3>
+<div class="photo">📷<br>Photos à ajouter par l'administrateur</div>
+</div>
+<div class="section">
+<h3>Références</h3>
+<p>Sources documentaires à renseigner.</p>
+</div>
+</section>
 </main>
 
-<nav>
- <button class="active" onclick="goHome()">🏠 Accueil</button>
- <button onclick="showSearch()">🔍 Recherche</button>
- <button onclick="alert('Les favoris seront disponibles dans une prochaine version.')">⭐ Favoris</button>
-</nav>
-
-<footer>PharmaMemo · Version 1.0 · Catalogue en construction</footer>
+<footer>PharmaMemo · Catalogue en construction</footer>
 
 <script>
-const categories={
-"Cardiologie":["Antiarythmiques","Antihypertenseurs","Diurétiques","Antiangineux","Anticoagulants","Antiagrégants plaquettaires","Hypolipémiants"],
-"Pneumologie":["Bronchodilatateurs","Corticoïdes inhalés","Antitussifs","Mucolytiques"],
-"Neurologie":["Antiépileptiques","Antiparkinsoniens","Antimigraineux","Psychotropes"],
-"Endocrinologie":["Antidiabétiques","Hormones thyroïdiennes","Corticoïdes","Traitements hormonaux"],
-"Gastro-entérologie":["IPP","Antiémétiques","Laxatifs","Antispasmodiques"],
-"Infectiologie":["Antibiotiques","Antiviraux","Antifongiques","Antiparasitaires"],
-"Rhumatologie":["AINS","Antalgiques","Traitements de fond"],
-"Dermatologie":["Dermocorticoïdes","Antifongiques","Antibiotiques locaux"]
-};
+const medicines=[
+{name:"Amiodarone",dci:"Amiodarone",cls:"Antiarythmique de classe III"},
+{name:"Flécaïnide",dci:"Flécaïnide",cls:"Antiarythmique de classe Ic"},
+{name:"Propafénone",dci:"Propafénone",cls:"Antiarythmique de classe Ic"},
+{name:"Sotalol",dci:"Sotalol",cls:"Antiarythmique de classe III"}
+];
 
-function openSpecialty(name){
- document.getElementById('home').classList.add('hidden');
- document.getElementById('searchPage').classList.add('hidden');
- document.getElementById('details').classList.remove('hidden');
- document.getElementById('specialtyTitle').textContent=name;
- const area=document.getElementById('categories');
- area.innerHTML='';
- (categories[name]||[]).forEach(cat=>{
-  const el=document.createElement('div');
-  el.className='item';
-  el.innerHTML='<div class="emoji">💊</div><strong></strong><small>Voir les médicaments</small>';
-  el.querySelector('strong').textContent=cat;
-  el.onclick=()=>alert('La catégorie '+cat+' sera connectée au catalogue dans une prochaine version.');
-  area.appendChild(el);
- });
- window.scrollTo(0,0);
+function show(id){
+["home","categories","drugs","fiche"].forEach(x=>
+document.getElementById(x).classList.add("hidden"));
+document.getElementById(id).classList.remove("hidden");
+window.scrollTo(0,0);
 }
 
-function goHome(){
- document.getElementById('home').classList.remove('hidden');
- document.getElementById('details').classList.add('hidden');
- document.getElementById('searchPage').classList.add('hidden');
+function openCardio(){show("categories")}
+
+function openDrugs(){
+show("drugs");
+renderDrugs(medicines);
 }
 
-function showSearch(){
- document.getElementById('home').classList.add('hidden');
- document.getElementById('details').classList.add('hidden');
- document.getElementById('searchPage').classList.remove('hidden');
+function renderDrugs(list){
+const area=document.getElementById("drugList");
+area.innerHTML="";
+list.forEach(m=>{
+const card=document.createElement("div");
+card.className="card";
+const name=document.createElement("strong");
+name.textContent=m.name;
+const detail=document.createElement("small");
+detail.textContent=m.cls;
+card.append(name,detail);
+card.onclick=()=>openFiche(m);
+area.appendChild(card);
+});
+if(!list.length) area.textContent="Aucun résultat.";
 }
 
-function searchItems(){
- const q=document.getElementById('search').value.toLowerCase();
- document.querySelectorAll('#specialties .item').forEach(el=>{
-  el.style.display=el.innerText.toLowerCase().includes(q)?'block':'none';
- });
+function openFiche(m){
+document.getElementById("drugName").textContent=m.name;
+document.getElementById("drugClass").textContent=m.cls;
+document.getElementById("dci").textContent=m.dci;
+document.getElementById("classDetail").textContent=m.cls;
+show("fiche");
+}
+
+function filterDrugs(){
+const q=document.getElementById("search").value.toLowerCase();
+renderDrugs(medicines.filter(m=>
+m.name.toLowerCase().includes(q)||
+m.dci.toLowerCase().includes(q)
+));
 }
 </script>
 </body>
