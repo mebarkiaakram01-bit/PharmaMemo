@@ -144,13 +144,14 @@ const logoutButton = document.getElementById('logoutButton');
 function message(text) {
   status.textContent = text;
 }
+
 function openMedicine(m) {
   const container = document.getElementById('medicines');
   const detail = document.getElementById('medicine-detail');
 
   container.hidden = true;
   detail.hidden = false;
-  detail.innerHTML = '';
+  detail.replaceChildren();
 
   const back = document.createElement('button');
   back.textContent = '← Retour au catalogue';
@@ -158,60 +159,126 @@ function openMedicine(m) {
     detail.hidden = true;
     container.hidden = false;
   };
+  detail.appendChild(back);
+
+  // En-tête du médicament
+  const header = document.createElement('div');
+  header.style.background = '#eaf2ff';
+  header.style.padding = '18px';
+  header.style.borderRadius = '12px';
+  header.style.margin = '16px 0';
 
   const title = document.createElement('h2');
-title.textContent = m.dci;
+  title.textContent = m.dc || 'Médicament';
 
-const dciLabel = document.createElement('p');
-dciLabel.textContent = 'DCI : ' + m.dci;
+  const dci = document.createElement('p');
+  dci.textContent = 'DCI : ' + (m.dci || 'Non renseignée');
 
-const dcLabel = document.createElement('p');
-dcLabel.textContent = 'DC (Nom commercial) : ' + m.dc;
+  const rayon = document.createElement('p');
+  rayon.textContent = m.rayon || '';
 
-  const fields = [
-    ['Rayon', m.rayon],
+  header.append(title, dci, rayon);
+  detail.appendChild(header);
+
+  // Fonction pour créer une section
+  function addSection(titleText, fields) {
+    const section = document.createElement('section');
+    section.style.background = '#f8fafc';
+    section.style.padding = '14px';
+    section.style.borderRadius = '10px';
+    section.style.margin = '12px 0';
+
+    const heading = document.createElement('h3');
+    heading.textContent = titleText;
+    section.appendChild(heading);
+
+    fields.forEach(([label, value]) => {
+      if (value) {
+        const block = document.createElement('div');
+        block.style.margin = '10px 0';
+
+        const name = document.createElement('strong');
+        name.textContent = label;
+
+        const content = document.createElement('p');
+        content.textContent = value;
+        content.style.whiteSpace = 'pre-wrap';
+
+        block.append(name, content);
+        section.appendChild(block);
+      }
+    });
+
+    detail.appendChild(section);
+  }
+
+  addSection('1. Identification', [
     ['Famille thérapeutique', m.famille_therapeutique],
     ['Classe thérapeutique', m.classe_therapeutique],
     ['Forme galénique', m.forme_galenique],
-    ['Dosage', m.dosage],
-    ['Indications thérapeutiques', m.indications_therapeutiques],
-    ['Contre-indication majeure', m.contre_indication_majeure],
-    ['Posologie', m.posologie],
+    ['Dosage', m.dosage]
+  ]);
+
+  addSection('2. Indications thérapeutiques', [
+    ['Indications', m.indications_therapeutiques]
+  ]);
+
+  addSection('3. Contre-indications majeures', [
+    ['Contre-indications', m.contre_indication_majeure]
+  ]);
+
+  addSection('4. Posologie', [
+    ['Modalités d’administration', m.posologie]
+  ]);
+
+  addSection('5. Effets indésirables', [
     ['Effets indésirables', m.effets_indesirables]
-  ];
+  ]);
 
-  detail.append(back, title, dciLabel, dcLabel);
+  // Photos et documents
+  const media = document.createElement('section');
+  media.style.background = '#f8fafc';
+  media.style.padding = '14px';
+  media.style.borderRadius = '10px';
+  media.style.margin = '12px 0';
 
-  fields.forEach(([label, value]) => {
-    if (value) {
-      const p = document.createElement('p');
-      p.textContent = label + ' : ' + value;
-      detail.appendChild(p);
-    }
-  });
+  const mediaTitle = document.createElement('h3');
+  mediaTitle.textContent = '6. Photos et documents';
+  media.appendChild(mediaTitle);
 
   if (m.photo_boite) {
-    const heading = document.createElement('h3');
+    const heading = document.createElement('h4');
     heading.textContent = 'Photo de la boîte';
+
     const img = document.createElement('img');
     img.src = m.photo_boite;
     img.alt = 'Boîte de ' + m.dci;
     img.style.maxWidth = '220px';
-    detail.append(heading, img);
+    img.style.width = '100%';
+    img.style.borderRadius = '8px';
+
+    media.append(heading, img);
   }
 
   if (m.photo_notice) {
-    const heading = document.createElement('h3');
+    const heading = document.createElement('h4');
     heading.textContent = 'Photo de la notice';
+
     const img = document.createElement('img');
     img.src = m.photo_notice;
     img.alt = 'Notice de ' + m.dci;
     img.style.maxWidth = '220px';
-    detail.append(heading, img);
+    img.style.width = '100%';
+    img.style.borderRadius = '8px';
+
+    media.append(heading, img);
   }
+
+  detail.appendChild(media);
 
   window.scrollTo(0, 0);
 }
+
 
 async function loadMedicines() {
   const container = document.getElementById('medicines');
