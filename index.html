@@ -197,14 +197,18 @@ function openMedicine(m) {
         const block = document.createElement('div');
         block.style.margin = '10px 0';
 
-        const name = document.createElement('strong');
-        name.textContent = label;
+const content = document.createElement('p');
+content.textContent = value;
+content.style.whiteSpace = 'pre-wrap';
+content.style.margin = '0';
 
-        const content = document.createElement('p');
-        content.textContent = value;
-        content.style.whiteSpace = 'pre-wrap';
+if (label) {
+  const name = document.createElement('strong');
+  name.textContent = label;
+  block.appendChild(name);
+}
 
-        block.append(name, content);
+block.appendChild(content);
         section.appendChild(block);
       }
     });
