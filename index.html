@@ -62,7 +62,7 @@
 
       from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-    const SUPABASE_URL = 'https://qulbaraucapotlozcrfx.supabase.co/rest/v1/';
+    const SUPABASE_URL = 'https://qulbaraucapotlozcrfx.supabase.co';
 
     const SUPABASE_KEY = 'sb_publishable_ZMNwt__G7PShAkzknd9tAw_L_6BewQx';
 
@@ -152,18 +152,4 @@
 
 </body>
 
-</html>("dci").textContent=m.dci;
-document.getElementById("classDetail").textContent=m.cls;
-show("fiche");
-}
-
-function filterDrugs(){
-const q=document.getElementById("search").value.toLowerCase();
-renderDrugs(medicines.filter(m=>
-m.name.toLowerCase().includes(q)||
-m.dci.toLowerCase().includes(q)
-));
-}
-</script>
-</body>
 </html>
