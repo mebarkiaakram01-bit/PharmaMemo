@@ -216,29 +216,11 @@ block.appendChild(content);
     detail.appendChild(section);
   }
 
-  // Informations principales
-const info = document.createElement('div');
-info.style.display = 'flex';
-info.style.flexWrap = 'wrap';
-info.style.gap = '8px';
-info.style.margin = '12px 0';
-
-[m.dosage, m.forme_galenique].filter(Boolean).forEach(value => {
-  const badge = document.createElement('span');
-  badge.textContent = value;
-  badge.style.background = '#eaf2ff';
-  badge.style.color = '#1d4ed8';
-  badge.style.padding = '8px 12px';
-  badge.style.borderRadius = '20px';
-  badge.style.fontWeight = '600';
-  info.appendChild(badge);
-});
-
-detail.appendChild(info);
-
 addSection('1. Identification', [
   ['Famille thérapeutique', m.famille_therapeutique],
-  ['Classe thérapeutique', m.classe_therapeutique]
+  ['Classe thérapeutique', m.classe_therapeutique],
+  ['Forme galénique', m.forme_galenique],
+  ['Dosage', m.dosage]
 ]);
 
   addSection('2. Indications thérapeutiques', [
