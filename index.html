@@ -1,155 +1,343 @@
 <!DOCTYPE html>
-
 <html lang="fr">
-
 <head>
-
-  <meta charset="UTF-8">
-
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <title>PharmaMemo</title>
-
-  <style>
-
-    body {
-
-      font-family: Arial, sans-serif;
-
-      background: #f2f6fc;
-
-      color: #183153;
-
-      padding: 20px;
-
-    }
-
-    h1 { color: #1769aa; }
-
-    .medicine {
-
-      background: white;
-
-      padding: 15px;
-
-      margin: 12px 0;
-
-      border-radius: 12px;
-
-      box-shadow: 0 2px 8px #0001;
-
-    }
-
-    #status { color: #555; }
-
-  </style>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PharmaMemo</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f1f5fb;
+  color: #193451;
+}
+header {
+  background: #1769aa;
+  color: white;
+  padding: 22px;
+  text-align: center;
+}
+header h1 { margin: 0 0 8px; }
+main { max-width: 850px; margin: auto; padding: 18px; }
+button {
+  background: #1769aa;
+  color: white;
+  border: 0;
+  border-radius: 9px;
+  padding: 12px 17px;
+  cursor: pointer;
+  margin: 5px 3px;
+}
+input, textarea {
+  width: 100%;
+  padding: 12px;
+  margin: 6px 0 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: white;
+}
+label { font-weight: bold; }
+.card {
+  background: white;
+  padding: 16px;
+  border-radius: 12px;
+  margin: 12px 0;
+  box-shadow: 0 2px 8px #0001;
+}
+.card img { max-width: 140px; display: block; margin-top: 10px; }
+.hidden { display: none; }
+#status { padding: 10px; }
+</style>
 </head>
-
 <body>
 
+<header>
   <h1>💊 PharmaMemo</h1>
-
   <p>Mon catalogue de médicaments</p>
+</header>
 
-  <p id="status">Connexion à la base de données...</p>
+<main>
+  <button id="adminButton">Administration</button>
+  <button id="logoutButton" class="hidden">Déconnexion</button>
 
+  <p id="status">Chargement du catalogue...</p>
+
+  <section id="loginSection" class="card hidden">
+    <h2>Connexion administrateur</h2>
+    <label>Email</label>
+    <input id="email" type="email" placeholder="Ton adresse email">
+    <label>Mot de passe</label>
+    <input id="password" type="password" placeholder="Ton mot de passe">
+    <button id="loginButton">Se connecter</button>
+  </section>
+
+  <section id="adminSection" class="card hidden">
+    <h2>Ajouter un médicament</h2>
+
+    <form id="medicineForm">
+
+      <label>Rayon *</label>
+      <input name="rayon" required placeholder="Ex. Cardiologie">
+
+      <label>Famille thérapeutique</label>
+      <input name="famille_therapeutique">
+
+      <label>Classe thérapeutique *</label>
+      <input name="classe_therapeutique" required>
+
+      <label>DCI *</label>
+      <input name="dci" required>
+
+      <label>DC *</label>
+      <input name="dc" required>
+
+      <label>Forme galénique</label>
+      <input name="forme_galenique">
+
+      <label>Dosage</label>
+      <input name="dosage">
+
+      <label>Indications thérapeutiques</label>
+      <textarea name="indications_therapeutiques"></textarea>
+
+      <label>Contre-indication majeure</label>
+      <textarea name="contre_indication_majeure"></textarea>
+
+      <label>Posologie</label>
+      <textarea name="posologie"></textarea>
+
+      <label>Effets indésirables</label>
+      <textarea name="effets_indesirables"></textarea>
+
+      <label>Photo de la boîte (obligatoire) *</label>
+      <input name="photo_boite" type="file" accept="image/*" required>
+
+      <label>Photo de la notice (facultative)</label>
+      <input name="photo_notice" type="file" accept="image/*">
+
+      <button type="submit" id="saveButton">
+        Enregistrer le médicament
+      </button>
+    </form>
+  </section>
+
+  <h2>Catalogue des médicaments</h2>
   <div id="medicines"></div>
+</main>
 
-  <script type="module">
+<script type="module">
+import { createClient }
+from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 
-    import { createClient }
+const SUPABASE_URL = 'https://qulbaraucapotlozcrfx.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_ZMNwt_G7PShAkzknd9tAw_L_6BewQx';
 
-      from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const SUPABASE_URL = 'https://qulbaraucapotlozcrfx.supabase.co';
+const status = document.getElementById('status');
+const loginSection = document.getElementById('loginSection');
+const adminSection = document.getElementById('adminSection');
+const logoutButton = document.getElementById('logoutButton');
 
-    const SUPABASE_KEY = 'sb_publishable_ZMNwt__G7PShAkzknd9tAw_L_6BewQx';
+function message(text) {
+  status.textContent = text;
+}
 
-    const supabase = createClient(
+async function loadMedicines() {
+  const container = document.getElementById('medicines');
+  container.replaceChildren();
 
-      SUPABASE_URL,
+  const { data, error } = await supabase
+    .from('medicaments')
+    .select('*')
+    .order('dci');
 
-      SUPABASE_KEY
+  if (error) {
+    message('Erreur : ' + error.message);
+    return;
+  }
 
-    );
+  message(data.length + ' médicament(s) chargé(s) depuis Supabase.');
 
-    async function loadMedicines() {
+  if (!data.length) {
+    container.textContent = 'Aucun médicament enregistré pour le moment.';
+    return;
+  }
 
-      const status = document.getElementById('status');
+  data.forEach(m => {
+    const card = document.createElement('article');
+    card.className = 'card';
 
-      const container = document.getElementById('medicines');
+    const title = document.createElement('h3');
+    title.textContent = m.dci;
 
-      const { data, error } = await supabase
+    const details = document.createElement('p');
+    details.textContent = `${m.dc || ''} — ${m.dosage || ''}`;
 
-        .from('medicaments')
+    const category = document.createElement('p');
+    category.textContent = `${m.rayon || ''} · ${m.classe_therapeutique || ''}`;
 
-        .select('id, dci, dc, dosage, rayon, photo_boite')
+    card.append(title, details, category);
 
-        .order('dci');
-
-      if (error) {
-
-        status.textContent = 'Erreur de connexion : ' + error.message;
-
-        return;
-
-      }
-
-      status.textContent = data.length +
-
-        ' médicament(s) chargé(s) depuis Supabase.';
-
-      if (data.length === 0) {
-
-        container.textContent = 'Aucun médicament enregistré pour le moment.';
-
-        return;
-
-      }
-
-      data.forEach(m => {
-
-        const card = document.createElement('div');
-
-        card.className = 'medicine';
-
-        const name = document.createElement('h3');
-
-        name.textContent = m.dci;
-
-        const details = document.createElement('p');
-
-        details.textContent =
-
-          (m.dc || '') + ' — ' + (m.dosage || '');
-
-        card.append(name, details);
-
-        if (m.photo_boite) {
-
-          const img = document.createElement('img');
-
-          img.src = m.photo_boite;
-
-          img.alt = 'Boîte de ' + m.dci;
-
-          img.style.maxWidth = '120px';
-
-          card.appendChild(img);
-
-        }
-
-        container.appendChild(card);
-
-      });
-
+    if (m.photo_boite) {
+      const img = document.createElement('img');
+      img.src = m.photo_boite;
+      img.alt = 'Boîte de ' + m.dci;
+      card.appendChild(img);
     }
 
-    loadMedicines();
+    container.appendChild(card);
+  });
+}
 
-  </script>
+async function checkAdmin() {
+  const { data: sessionData } = await supabase.auth.getSession();
+  const user = sessionData.session?.user;
+
+  if (!user) {
+    adminSection.classList.add('hidden');
+    logoutButton.classList.add('hidden');
+    return false;
+  }
+
+  const { data, error } = await supabase
+    .from('admins')
+    .select('user_id')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  if (error || !data) {
+    await supabase.auth.signOut();
+    message('Ce compte ne possède pas les droits administrateur.');
+    return false;
+  }
+
+  adminSection.classList.remove('hidden');
+  logoutButton.classList.remove('hidden');
+  loginSection.classList.add('hidden');
+  message('Connecté en tant qu’administrateur.');
+  return true;
+}
+
+document.getElementById('adminButton').addEventListener('click', async () => {
+  const isAdmin = await checkAdmin();
+  if (!isAdmin) loginSection.classList.remove('hidden');
+});
+
+document.getElementById('loginButton').addEventListener('click', async () => {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+
+  message('Connexion en cours...');
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    message('Erreur de connexion : ' + error.message);
+    return;
+  }
+
+  const isAdmin = await checkAdmin();
+  if (isAdmin) message('Bienvenue dans ton espace administrateur !');
+});
+
+logoutButton.addEventListener('click', async () => {
+  await supabase.auth.signOut();
+  adminSection.classList.add('hidden');
+  logoutButton.classList.add('hidden');
+  message('Déconnexion effectuée.');
+});
+
+async function uploadPhoto(file) {
+  if (!file) return null;
+
+  if (!file.type.startsWith('image/')) {
+    throw new Error('Le fichier choisi doit être une image.');
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error('Chaque image doit faire 5 Mo maximum.');
+  }
+
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const path = `${crypto.randomUUID()}-${safeName}`;
+
+  const { error } = await supabase.storage
+    .from('photos-medicaments')
+    .upload(path, file, { contentType: file.type });
+
+  if (error) throw error;
+
+  const { data } = supabase.storage
+    .from('photos-medicaments')
+    .getPublicUrl(path);
+
+  return data.publicUrl;
+}
+
+document.getElementById('medicineForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  const form = event.currentTarget;
+  const values = new FormData(form);
+  const boxFile = values.get('photo_boite');
+  const noticeFile = values.get('photo_notice');
+
+  if (!boxFile || !boxFile.size) {
+    message('La photo de la boîte est obligatoire.');
+    return;
+  }
+
+  const saveButton = document.getElementById('saveButton');
+  saveButton.disabled = true;
+  message('Enregistrement en cours...');
+
+  try {
+    const boxUrl = await uploadPhoto(boxFile);
+    const noticeUrl = noticeFile?.size
+      ? await uploadPhoto(noticeFile)
+      : null;
+
+    const medicine = {
+      rayon: values.get('rayon').trim(),
+      famille_therapeutique: values.get('famille_therapeutique').trim() || null,
+      classe_therapeutique: values.get('classe_therapeutique').trim(),
+      dci: values.get('dci').trim(),
+      dc: values.get('dc').trim(),
+      forme_galenique: values.get('forme_galenique').trim() || null,
+      dosage: values.get('dosage').trim() || null,
+      indications_therapeutiques: values.get('indications_therapeutiques').trim() || null,
+      contre_indication_majeure: values.get('contre_indication_majeure').trim() || null,
+      posologie: values.get('posologie').trim() || null,
+      effets_indesirables: values.get('effets_indesirables').trim() || null,
+      photo_boite: boxUrl,
+      photo_notice: noticeUrl
+    };
+
+    const { error } = await supabase
+      .from('medicaments')
+      .insert(medicine);
+
+    if (error) throw error;
+
+    message('Médicament ajouté avec succès !');
+    form.reset();
+    await loadMedicines();
+
+  } catch (error) {
+    message('Erreur : ' + error.message);
+  } finally {
+    saveButton.disabled = false;
+  }
+});
+
+await loadMedicines();
+await checkAdmin();
+</script>
 
 </body>
-
 </html>
