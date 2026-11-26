@@ -220,20 +220,20 @@ function openMedicine(m) {
   ]);
 
   addSection('2. Indications thérapeutiques', [
-    ['Indications', m.indications_therapeutiques]
-  ]);
+  ['', m.indications_therapeutiques]
+]);
 
-  addSection('3. Contre-indications majeures', [
-    ['Contre-indications', m.contre_indication_majeure]
-  ]);
+addSection('3. Contre-indications majeures', [
+  ['', m.contre_indication_majeure]
+]);
 
-  addSection('4. Posologie', [
-    ['Modalités d’administration', m.posologie]
-  ]);
+addSection('4. Posologie', [
+  ['', m.posologie]
+]);
 
-  addSection('5. Effets indésirables', [
-    ['Effets indésirables', m.effets_indesirables]
-  ]);
+addSection('5. Effets indésirables', [
+  ['', m.effets_indesirables]
+]);
 
   // Photos et documents
   const media = document.createElement('section');
