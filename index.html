@@ -212,9 +212,14 @@ dcLabel.textContent = 'DC (Nom commercial) : ' + m.dc;
 
   window.scrollTo(0, 0);
 }
+
 async function loadMedicines() {
   const container = document.getElementById('medicines');
+  const detail = document.getElementById('medicine-detail');
+
   container.replaceChildren();
+  container.hidden = false;
+  detail.hidden = true;
 
   const { data, error } = await supabase
     .from('medicaments')
@@ -226,39 +231,123 @@ async function loadMedicines() {
     return;
   }
 
-  message(data.length + ' médicament(s) chargé(s) depuis Supabase.');
-
-  if (!data.length) {
-    container.textContent = 'Aucun médicament enregistré pour le moment.';
+  if (!data || !data.length) {
+    container.textContent = 'Aucun médicament enregistré.';
+    message('Catalogue vide.');
     return;
   }
 
-  data.forEach(m => {
-    const card = document.createElement('article');
-    card.className = 'card';
+  message(data.length + ' médicament(s) chargé(s).');
 
-    const title = document.createElement('h3');
-    title.textContent = m.dci;
+  const levels = [
+    { field: 'rayon', label: 'Rayons' },
+    { field: 'famille_therapeutique', label: 'Familles thérapeutiques' },
+    { field: 'classe_therapeutique', label: 'Classes thérapeutiques' },
+    { field: 'dci', label: 'DCI' }
+  ];
 
-    const details = document.createElement('p');
-    details.textContent = `${m.dc || ''} — ${m.dosage || ''}`;
+  let path = [];
 
-    const category = document.createElement('p');
-    category.textContent = `${m.rayon || ''} · ${m.classe_therapeutique || ''}`;
+  function getValue(m, field) {
+    return String(m[field] || 'Non renseigné').trim();
+  }
 
-    card.append(title, details, category);
+  function renderLevel() {
+    container.replaceChildren();
+    container.hidden = false;
+    detail.hidden = true;
 
-    if (m.photo_boite) {
-      const img = document.createElement('img');
-      img.src = m.photo_boite;
-      img.alt = 'Boîte de ' + m.dci;
-      card.appendChild(img);
+    if (path.length > 0) {
+      const back = document.createElement('button');
+      back.textContent = '← Retour';
+      back.onclick = () => {
+        path.pop();
+        renderLevel();
+      };
+      container.appendChild(back);
     }
-    card.style.cursor = 'pointer';
-    card.addEventListener('click', () => openMedicine(m));
-    container.appendChild(card);
-  });
+
+    const heading = document.createElement('h2');
+    heading.textContent = path.length < 4
+      ? levels[path.length].label
+      : 'Dénominations commerciales (DC)';
+
+    container.appendChild(heading);
+
+    let items = data.filter(m =>
+      path.every(step => getValue(m, step.field) === step.value)
+    );
+
+    if (path.length < 4) {
+      const field = levels[path.length].field;
+
+      const values = [...new Set(
+        items.map(m => getValue(m, field))
+      )].sort((a, b) => a.localeCompare(b));
+
+      values.forEach(value => {
+        const group = items.filter(
+          m => getValue(m, field) === value
+        );
+
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.style.cursor = 'pointer';
+
+        const title = document.createElement('h3');
+        title.textContent = value;
+
+        const count = document.createElement('p');
+        count.textContent = group.length + ' médicament(s)';
+
+        card.append(title, count);
+
+        card.addEventListener('click', () => {
+          path.push({ field, value });
+          renderLevel();
+        });
+
+        container.appendChild(card);
+      });
+
+    } else {
+      const commercialNames = [...new Set(
+        items.map(m => getValue(m, 'dc'))
+      )].sort((a, b) => a.localeCompare(b));
+
+      commercialNames.forEach(name => {
+        const group = items.filter(
+          m => getValue(m, 'dc') === name
+        );
+
+        const medicine = group[0];
+
+        const card = document.createElement('article');
+        card.className = 'card';
+        card.style.cursor = 'pointer';
+
+        const title = document.createElement('h3');
+        title.textContent = name;
+
+        const dosage = document.createElement('p');
+        dosage.textContent = 'Dosage : ' + (medicine.dosage || 'Non renseigné');
+
+        card.append(title, dosage);
+
+        card.addEventListener('click', () => {
+          openMedicine(medicine);
+        });
+
+        container.appendChild(card);
+      });
+    }
+
+    window.scrollTo(0, 0);
+  }
+
+  renderLevel();
 }
+
 
 async function checkAdmin() {
   const { data: sessionData } = await supabase.auth.getSession();
