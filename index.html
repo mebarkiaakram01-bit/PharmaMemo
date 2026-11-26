@@ -145,7 +145,7 @@ function message(text) {
   status.textContent = text;
 }
 
-function openMedicine(m) {
+async function openMedicine(m) {
   const container = document.getElementById('medicines');
   const detail = document.getElementById('medicine-detail');
 
@@ -264,19 +264,40 @@ addSection('5. Effets indésirables', [
     media.append(heading, img);
   }
 
-  if (m.photo_notice) {
-    const heading = document.createElement('h4');
-    heading.textContent = 'Photo de la notice';
+  const noticeHeading = document.createElement('h4');
+noticeHeading.textContent = 'Notices médicales (PDF)';
+media.appendChild(noticeHeading);
 
-    const img = document.createElement('img');
-    img.src = m.photo_notice;
-    img.alt = 'Notice de ' + m.dci;
-    img.style.maxWidth = '220px';
-    img.style.width = '100%';
-    img.style.borderRadius = '8px';
+const { data: notices, error } = await supabase
+  .from('medicament_notices')
+  .select('*')
+  .eq('medicament_id', m.id)
+  .order('created_at');
 
-    media.append(heading, img);
-  }
+if (error) {
+  const errorText = document.createElement('p');
+  errorText.textContent = 'Erreur de chargement des notices.';
+  media.appendChild(errorText);
+} else if (!notices || notices.length === 0) {
+  const emptyText = document.createElement('p');
+  emptyText.textContent = 'Aucune notice PDF disponible.';
+  media.appendChild(emptyText);
+} else {
+  notices.forEach(notice => {
+    const title = document.createElement('h4');
+    title.textContent = notice.nom_notice;
+
+    const viewer = document.createElement('iframe');
+    viewer.src = notice.fichier_url;
+    viewer.title = notice.nom_notice;
+    viewer.style.width = '100%';
+    viewer.style.height = '600px';
+    viewer.style.border = '1px solid #ddd';
+    viewer.style.borderRadius = '8px';
+
+    media.append(title, viewer);
+  });
+}
 
   detail.appendChild(media);
 
