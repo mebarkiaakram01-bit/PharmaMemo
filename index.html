@@ -160,10 +160,13 @@ function openMedicine(m) {
   };
 
   const title = document.createElement('h2');
-  title.textContent = m.dci;
+title.textContent = m.dci;
 
-  const dc = document.createElement('h3');
-  dc.textContent = m.dc || '';
+const dciLabel = document.createElement('p');
+dciLabel.textContent = 'DCI : ' + m.dci;
+
+const dcLabel = document.createElement('p');
+dcLabel.textContent = 'DC (Nom commercial) : ' + m.dc;
 
   const fields = [
     ['Rayon', m.rayon],
@@ -177,7 +180,7 @@ function openMedicine(m) {
     ['Effets indésirables', m.effets_indesirables]
   ];
 
-  detail.append(back, title, dc);
+  detail.append(back, title, dciLabel, dcLabel);
 
   fields.forEach(([label, value]) => {
     if (value) {
