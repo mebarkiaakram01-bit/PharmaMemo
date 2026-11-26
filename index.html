@@ -144,7 +144,71 @@ const logoutButton = document.getElementById('logoutButton');
 function message(text) {
   status.textContent = text;
 }
+function openMedicine(m) {
+  const container = document.getElementById('medicines');
+  const detail = document.getElementById('medicine-detail');
 
+  container.hidden = true;
+  detail.hidden = false;
+  detail.innerHTML = '';
+
+  const back = document.createElement('button');
+  back.textContent = '← Retour au catalogue';
+  back.onclick = () => {
+    detail.hidden = true;
+    container.hidden = false;
+  };
+
+  const title = document.createElement('h2');
+  title.textContent = m.dci;
+
+  const dc = document.createElement('h3');
+  dc.textContent = m.dc || '';
+
+  const fields = [
+    ['Rayon', m.rayon],
+    ['Famille thérapeutique', m.famille_therapeutique],
+    ['Classe thérapeutique', m.classe_therapeutique],
+    ['Forme galénique', m.forme_galenique],
+    ['Dosage', m.dosage],
+    ['Indications thérapeutiques', m.indications_therapeutiques],
+    ['Contre-indication majeure', m.contre_indication_majeure],
+    ['Posologie', m.posologie],
+    ['Effets indésirables', m.effets_indesirables]
+  ];
+
+  detail.append(back, title, dc);
+
+  fields.forEach(([label, value]) => {
+    if (value) {
+      const p = document.createElement('p');
+      p.textContent = label + ' : ' + value;
+      detail.appendChild(p);
+    }
+  });
+
+  if (m.photo_boite) {
+    const heading = document.createElement('h3');
+    heading.textContent = 'Photo de la boîte';
+    const img = document.createElement('img');
+    img.src = m.photo_boite;
+    img.alt = 'Boîte de ' + m.dci;
+    img.style.maxWidth = '220px';
+    detail.append(heading, img);
+  }
+
+  if (m.photo_notice) {
+    const heading = document.createElement('h3');
+    heading.textContent = 'Photo de la notice';
+    const img = document.createElement('img');
+    img.src = m.photo_notice;
+    img.alt = 'Notice de ' + m.dci;
+    img.style.maxWidth = '220px';
+    detail.append(heading, img);
+  }
+
+  window.scrollTo(0, 0);
+}
 async function loadMedicines() {
   const container = document.getElementById('medicines');
   container.replaceChildren();
@@ -187,7 +251,8 @@ async function loadMedicines() {
       img.alt = 'Boîte de ' + m.dci;
       card.appendChild(img);
     }
-
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', () => openMedicine(m));
     container.appendChild(card);
   });
 }
