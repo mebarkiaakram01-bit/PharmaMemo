@@ -110,11 +110,22 @@ label { font-weight: bold; }
       <label>Effets indésirables</label>
       <textarea name="effets_indesirables"></textarea>
 
-      <label>Photo de la boîte (obligatoire) *</label>
-      <input name="photo_boite" type="file" accept="image/*" required>
+      <label>Photos des boîtes *</label>
+<input
+  name="photos_boite"
+  type="file"
+  accept="image/*"
+  multiple
+  required
+>
 
-      <label>Photo de la notice (facultative)</label>
-      <input name="photo_notice" type="file" accept="image/*">
+<label>Notices médicales (PDF)</label>
+<input
+  name="notices_pdf"
+  type="file"
+  accept="application/pdf"
+  multiple
+>
 
       <button type="submit" id="saveButton">
         Enregistrer le médicament
@@ -543,16 +554,47 @@ async function uploadPhoto(file) {
   return data.publicUrl;
 }
 
+async function uploadNotice(file) {
+  if (!file) return null;
+
+  if (file.type !== 'application/pdf') {
+    throw new Error('La notice doit être au format PDF.');
+  }
+
+  if (file.size > 10 * 1024 * 1024) {
+    throw new Error('Chaque notice doit faire 10 Mo maximum.');
+  }
+
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const path = `${crypto.randomUUID()}-${safeName}`;
+
+  const { error } = await supabase.storage
+    .from('notices-medicaments')
+    .upload(path, file, { contentType: 'application/pdf' });
+
+  if (error) throw error;
+
+  const { data } = supabase.storage
+    .from('notices-medicaments')
+    .getPublicUrl(path);
+
+  return data.publicUrl;
+}
+
 document.getElementById('medicineForm').addEventListener('submit', async (event) => {
   event.preventDefault();
 
   const form = event.currentTarget;
   const values = new FormData(form);
-  const boxFile = values.get('photo_boite');
-  const noticeFile = values.get('photo_notice');
 
-  if (!boxFile || !boxFile.size) {
-    message('La photo de la boîte est obligatoire.');
+  const photoFiles = values.getAll('photos_boite')
+    .filter(file => file.size > 0);
+
+  const noticeFiles = values.getAll('notices_pdf')
+    .filter(file => file.size > 0);
+
+  if (photoFiles.length === 0) {
+    message('Ajoute au moins une photo de boîte.');
     return;
   }
 
@@ -561,10 +603,11 @@ document.getElementById('medicineForm').addEventListener('submit', async (event)
   message('Enregistrement en cours...');
 
   try {
-    const boxUrl = await uploadPhoto(boxFile);
-    const noticeUrl = noticeFile?.size
-      ? await uploadPhoto(noticeFile)
-      : null;
+    const photoUrls = [];
+
+    for (const file of photoFiles) {
+      photoUrls.push(await uploadPhoto(file));
+    }
 
     const medicine = {
       rayon: values.get('rayon').trim(),
@@ -578,17 +621,47 @@ document.getElementById('medicineForm').addEventListener('submit', async (event)
       contre_indication_majeure: values.get('contre_indication_majeure').trim() || null,
       posologie: values.get('posologie').trim() || null,
       effets_indesirables: values.get('effets_indesirables').trim() || null,
-      photo_boite: boxUrl,
-      photo_notice: noticeUrl
+      photo_boite: photoUrls[0],
+      photo_notice: null
     };
 
-    const { error } = await supabase
+    const { data: savedMedicine, error } = await supabase
       .from('medicaments')
-      .insert(medicine);
+      .insert(medicine)
+      .select('id')
+      .single();
 
     if (error) throw error;
 
-    message('Médicament ajouté avec succès !');
+    const medicineId = savedMedicine.id;
+
+    const photoRecords = photoUrls.map(url => ({
+      medicament_id: medicineId,
+      type_photo: 'boite',
+      photo_url: url
+    }));
+
+    const { error: photoError } = await supabase
+      .from('medicament_photos')
+      .insert(photoRecords);
+
+    if (photoError) throw photoError;
+
+    for (const file of noticeFiles) {
+      const url = await uploadNotice(file);
+
+      const { error: noticeError } = await supabase
+        .from('medicament_notices')
+        .insert({
+          medicament_id: medicineId,
+          nom_notice: file.name,
+          fichier_url: url
+        });
+
+      if (noticeError) throw noticeError;
+    }
+
+    message('Médicament et fichiers enregistrés avec succès !');
     form.reset();
     await loadMedicines();
 
