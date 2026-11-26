@@ -257,11 +257,18 @@ async function loadMedicines() {
     container.hidden = false;
     detail.hidden = true;
 if (path.length > 0) {
-  const breadcrumb = document.createElement('p');
-  breadcrumb.textContent = path.map(step => step.value).join('  ›  ');
-  breadcrumb.style.fontSize = '14px';
-  breadcrumb.style.color = '#64748b';
-  breadcrumb.style.fontWeight = '600';
+  const breadcrumb = document.createElement('div');
+
+  path.forEach(step => {
+    const line = document.createElement('p');
+    line.textContent = step.value;
+    line.style.fontSize = '14px';
+    line.style.color = '#64748b';
+    line.style.fontWeight = '600';
+    line.style.margin = '4px 0';
+    breadcrumb.appendChild(line);
+  });
+
   container.appendChild(breadcrumb);
 }
     if (path.length > 0) {
